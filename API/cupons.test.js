@@ -1,4 +1,5 @@
 const request = require('supertest');
+const { expectValidCoupon } = require('./contracts/coupon.contract');
 
 const API_URL = 'http://lojaebac.ebaconline.art.br';
 const AUTH_HEADER = 'Basic YWRtaW5fZWJhYzpAYWRtaW4hJmJAYyEyMDIy'; // admin_ebac : @admin!&b@c!2022
@@ -12,6 +13,10 @@ describe('US-0003: API de Cupons', () => {
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
+
+    if (response.body.length > 0) {
+      expectValidCoupon(response.body[0]);
+    }
   });
 
   test('CT-06: Deve cadastrar um novo cupom com sucesso (POST)', async () => {
@@ -30,6 +35,8 @@ describe('US-0003: API de Cupons', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id');
     expect(response.body.code).toBe(cupomCodigo.toLowerCase());
+
+    expectValidCoupon(response.body);
   });
 
   test('CT-07: Não deve permitir cadastrar cupom com código repetido (POST)', async () => {
